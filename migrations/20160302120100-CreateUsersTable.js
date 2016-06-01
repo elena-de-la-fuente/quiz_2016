@@ -18,6 +18,8 @@ module.exports = {
                 salt: { type: Sequelize.STRING },
                 isAdmin: { type: Sequelize.BOOLEAN,
                            defaultValue: false },
+                expira: { type: Sequelize.FLOAT,
+                           defaultValue: 0},
                 createdAt: { type: Sequelize.DATE,
                              allowNull: false },
                 updatedAt: { type: Sequelize.DATE,

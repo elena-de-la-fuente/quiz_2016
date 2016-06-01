@@ -9,6 +9,8 @@ var partials = require('express-partials');
 var flash = require('express-flash');
 var methodOverride = require('method-override');
 
+var dateParser = require('express-query-date'); //P12
+
 var routes = require('./routes/index');
 
 var app = express();
@@ -21,6 +23,7 @@ app.set('view engine', 'ejs');
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
+app.use(dateParser()); //P12
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({secret: "Quiz 2016",
@@ -39,6 +42,22 @@ app.use(function(req, res, next) {
    res.locals.session = req.session;
 
    next();
+});
+
+app.use(function(req, res, next){   //todo este metodo se incorpora en p12
+  if(req.session.user){
+    if(Date.now()>=req.session.user.expira){
+      delete req.session.user;
+      res.redirect("/session");
+    }
+    else{
+      req.session.user.expira = (Date.now()+120000);
+      next();
+    }
+  }
+  else{
+    next();
+  }
 });
 
 app.use('/', routes);
