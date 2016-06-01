@@ -1,0 +1,66 @@
+[1mdiff --git a/controllers/quiz_controller.js b/controllers/quiz_controller.js[m
+[1mindex f54ffae..c72b1e7 100644[m
+[1m--- a/controllers/quiz_controller.js[m
+[1m+++ b/controllers/quiz_controller.js[m
+[36m@@ -40,7 +40,13 @@[m [mexports.index = function(req, res, next) {[m
+   if(search==''){[m
+     models.Quiz.findAll()[m
+         .then(function(quizzes) {[m
+[31m-            res.render('quizzes/index.ejs', { quizzes: quizzes});[m
+[32m+[m[32m            // (P11) res.render('quizzes/index.ejs', { quizzes: quizzes});[m
+[32m+[m[32m          if (req.params.format == 'json'){[m
+[32m+[m[32m            res.json(quizzes);[m
+[32m+[m[32m          }[m
+[32m+[m[32m          else{[m
+[32m+[m[32m            res.render('quizzes/indez.ejs', {quizzes: quizzes});[m
+[32m+[m[32m          }[m
+         })[m
+         .catch(function(error) {[m
+             next(error);[m
+[36m@@ -49,7 +55,13 @@[m [mexports.index = function(req, res, next) {[m
+   else{[m
+     models.Quiz.findAll({where:{question: {$like: '%'+ req.query.search+'%'}}}).then(function(quizzes){[m
+   if(quizzes){[m
+[31m-    res.render('quizzes/index.ejs',{quizzes:quizzes});}[m
+[32m+[m[32m    // (P11) res.render('quizzes/index.ejs',{quizzes:quizzes});}[m
+[32m+[m[32m    if (req.params.format == 'json'){[m
+[32m+[m[32m      res.json(quizzes);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    else{[m
+[32m+[m[32m      res.render('quizzes/index.ejs', {quizzes: quizzes});}[m
+[32m+[m[32m    }[m
+   else{[m
+     throw new Error('No hay preguntas en la BBDD.');[m
+   }[m
+[36m@@ -64,8 +76,15 @@[m [mexports.show = function(req, res, next) {[m
+ [m
+     var answer = req.query.answer || '';[m
+ [m
+[31m-    res.render('quizzes/show', {quiz: req.quiz,[m
+[32m+[m[32m    if(req.params.format == 'json'){[m
+[32m+[m[32m      res.json(req.quiz);[m
+[32m+[m[32m    }[m
+[32m+[m[32m    else{[m
+[32m+[m[32m      res.render('quizzes/show', {quiz: req.quiz,[m
+                                 answer: answer});[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[41m    [m
+ };[m
+ [m
+ [m
+[1mdiff --git a/routes/index.js b/routes/index.js[m
+[1mindex 6826f54..0df9201 100644[m
+[1m--- a/routes/index.js[m
+[1m+++ b/routes/index.js[m
+[36m@@ -45,8 +45,8 @@[m [mrouter.delete('/users/:userId(\\d+)',   sessionController.loginRequired,[m
+ 										userController.destroy);  // borrar cuenta[m
+ [m
+ // Definición de rutas de /quizzes[m
+[31m-router.get('/quizzes',                     	quizController.index);[m
+[31m-router.get('/quizzes/:quizId(\\d+)',       	quizController.show);[m
+[32m+[m[32mrouter.get('/quizzes.:format?',                     	quizController.index);[m
+[32m+[m[32mrouter.get('/quizzes/:quizId(\\d+).:format?',       	quizController.show);[m
+ router.get('/quizzes/:quizId(\\d+)/check', 	quizController.check);[m
+ router.get('/quizzes/new',                 	sessionController.loginRequired, [m
+ 											quizController.new);[m
