@@ -4,7 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var session = require('express-session');
+var session = require('express-session');   //importar paquetes
 var partials = require('express-partials');
 var flash = require('express-flash');
 var methodOverride = require('method-override');
@@ -24,16 +24,16 @@ app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(dateParser()); //P12
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); //bodyParser.urlencoded(..) genera el objeto req.body.quiz cuando se configura con el parametro { extended: true }
 app.use(cookieParser());
 app.use(session({secret: "Quiz 2016",
                  resave: false,
                  saveUninitialized: true}));
-app.use(methodOverride('_method', {methods: ["POST", "GET"]}));
+app.use(methodOverride('_method', {methods: ["POST", "GET"]}));   //cargamos y configuramos mehorOverride para q detecte el parametro oculto_method en post y get
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(partials());
-app.use(flash());
+app.use(flash());   //nstalar MW flash
 
 // Helper dinamico:
 app.use(function(req, res, next) {

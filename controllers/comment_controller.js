@@ -19,7 +19,7 @@ exports.load = function(req, res, next, commentId) {
 
 
 // GET /quizzes/:quizId/comments/new
-exports.new = function(req, res, next) {
+exports.new = function(req, res, next) {        //nstancia el formulario de crear nueo comentario
   var comment = models.Comment.build({text: ""});
 
   res.render('comments/new', { comment: comment, 
@@ -32,13 +32,14 @@ exports.new = function(req, res, next) {
 exports.create = function(req, res, next) {
   var comment = models.Comment.build(
       { text:   req.body.comment.text,          
-        QuizId: req.quiz.id
+        QuizId: req.quiz.id,            //comment.belongTo(Quiz) añade el campo QuizId en la tabla comment para asociar el comentario al quizasociado a traves de la relacion
+        AuthorId: req.session.user.id
       });
 
   comment.save()
     .then(function(comment) {
       req.flash('success', 'Comentario creado con éxito.');
-      res.redirect('/quizzes/' + req.quiz.id);
+      res.redirect('/quizzes/' + req.quiz.id);    //me redirecciona a quizees/1 por ejemplo, pregnta donde he creado el comentario
     }) 
 	  .catch(Sequelize.ValidationError, function(error) {
 
@@ -60,7 +61,7 @@ exports.create = function(req, res, next) {
 // GET /quizzes/:quizId/comments/:commentId/accept
 exports.accept = function(req, res, next) {
 
-  req.comment.accepted = true;
+  req.comment.accepted = true;    //necesita autoload porque el comentario es de una pregunta en concreto
 
   req.comment.save(["accepted"])
     .then(function(comment) {

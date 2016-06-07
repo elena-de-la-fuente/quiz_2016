@@ -7,7 +7,7 @@ exports.load = function(req, res, next, quizId) {
     models.Quiz.findById(quizId, { include: [ models.Comment ] })
           .then(function(quiz) {
               if (quiz) {
-                req.quiz = quiz;
+                req.quiz = quiz; //a partir de aqui se va a usar req.quiz n exports,checky exports.show
                 next();
               } else {
                   throw new Error('No existe quizId=' + quizId);
@@ -18,7 +18,7 @@ exports.load = function(req, res, next, quizId) {
 
 
 // MW que permite acciones solamente si al usuario logeado es admin o es el autor del quiz.
-exports.ownershipRequired = function(req, res, next){
+exports.ownershipRequired = function(req, res, next){ //va a permitir hacer cambios si es el propietario del quiz o admin
 
     var isAdmin      = req.session.user.isAdmin;
     var quizAuthorId = req.quiz.AuthorId;
@@ -45,7 +45,7 @@ exports.index = function(req, res, next) {
             res.json(quizzes);
           }
           else{
-            res.render('quizzes/indez.ejs', {quizzes: quizzes});
+            res.render('quizzes/index.ejs', {quizzes: quizzes});
           }
         })
         .catch(function(error) {
@@ -74,18 +74,22 @@ exports.index = function(req, res, next) {
 // GET /quizzes/:id
 exports.show = function(req, res, next) {
 
-    var answer = req.query.answer || '';
+    // (p13) var answer = req.query.answer || '';
 
-    if(req.params.format == 'json'){
-      res.json(req.quiz);
-    }
-    else{
-      res.render('quizzes/show', {quiz: req.quiz,
-                                answer: answer});
-    }
-
+    // (p13) if(req.params.format == 'json'){
+    models.User.findAll()
+      .then(function(users){
+        var answer = req.query.answer || '';
+        if(req.params.format == 'json'){
+          res.json(req.quiz);
+        }
+        else{
+      res.render('quizzes/show', {quiz: req.quiz, //req.quz viene de exports.load
+                                answer: answer, users:users});
+      }
+      }).catch(function(error){next(error);});
+    };
     
-};
 
 
 // GET /quizzes/:id/check
@@ -103,8 +107,8 @@ exports.check = function(req, res, next) {
 
 // GET /quizzes/new
 exports.new = function(req, res, next) {
-  var quiz = models.Quiz.build({question: "", answer: ""});
-  res.render('quizzes/new', {quiz: quiz});
+  var quiz = models.Quiz.build({question: "", answer: ""}); //el metodo build(...) creo un objeto no persistente asociado a la tabla Quiz, con las prop inicializadas
+  res.render('quizzes/new', {quiz: quiz});                  //este objertose utiliza aqui solo pararenderizar las vistas inicializando los cajetines con strings vacios
 };
 
 // POST /quizzes/create
@@ -117,13 +121,13 @@ exports.create = function(req, res, next) {
                                  AuthorId: authorId } );
 
   // guarda en DB los campos pregunta y respuesta de quiz
-  quiz.save({fields: ["question", "answer", "AuthorId"]})
+  quiz.save({fields: ["question", "answer", "AuthorId"]})   //guarda en la BD como nueva entrada ocupando los valores de question, answer y AuthorId
       .then(function(quiz) {
-          req.flash('success', 'Quiz creado con éxito.');
+          req.flash('success', 'Quiz creado con éxito.'); //req.flash('info','<mensaje>'). Envia mensaje de exito
         res.redirect('/quizzes');  // res.redirect: Redirección HTTP a lista de preguntas
     })
-    .catch(Sequelize.ValidationError, function(error) {
-
+    .catch(Sequelize.ValidationError, function(error) {   //captura los errores que se hayan hecho al crear preguna
+                                                          //de esta forma capturará si el campo pregunto o el campo respuesta estan vacios
       req.flash('error', 'Errores en el formulario:');
       for (var i in error.errors) {
           req.flash('error', error.errors[i].value);

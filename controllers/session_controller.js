@@ -19,9 +19,9 @@ exports.loginRequired = function (req, res, next) {
     if (req.session.user) {
         next();
     } else {
-        res.redirect('/session?redir=' + (req.param('redir') || req.url));
-    }
-};
+        res.redirect('/session?redir=' + (req.param('redir') || req.url)); //CUando se pide por ejemplo /quizzes/1/edit y no esta log in
+    }                                               //redirige a /sesion y ademas guarda el url=/quizzes/1/edit en req (param oculto) para una vez
+};                                                  // log in poder acceder a la pag que se deseaba
 
 // MW que permite gestionar solamente si el usuario logeado es admin.
 exports.adminRequired = function(req, res, next){

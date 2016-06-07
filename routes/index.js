@@ -18,6 +18,9 @@ router.get('/author', function(req, res, next) {
 
 
 // Autoload de parametros
+//se instala con param() para que router.param('id', quizCOntroller.load) solo invoque quizController.load si existe el parametro :id
+//quizControler.load() se instala para que se eecute antes que lo necesiten las rutas show y answer y solo en el caso de que path contenga :id, referenciando
+//un recurso en la tabla QUiz de la BD qu deba ser procesado por el controlador
 router.param('quizId', quizController.load);  // autoload :quizId
 router.param('userId', userController.load);  // autoload :userId
 router.param('commentId', commentController.load);  // autoload :commentId
@@ -35,25 +38,25 @@ router.get('/users/:userId(\\d+)',      userController.show);    // ver un usuar
 router.get('/users/new',                userController.new);     // formulario sign un
 router.post('/users',                   userController.create);     // registrar usuario
 router.get('/users/:userId(\\d+)/edit', sessionController.loginRequired, 
-										sessionController.adminOrMyselfRequired, 
+										sessionController.adminOrMyselfRequired, //indica si es el admin o el usuario de la cuenta
 										userController.edit);     // editar información de cuenta
 router.put('/users/:userId(\\d+)',      sessionController.loginRequired, 
 										sessionController.adminOrMyselfRequired, 
 										userController.update);   // actualizar información de cuenta
 router.delete('/users/:userId(\\d+)',   sessionController.loginRequired, 
-										sessionController.adminAndNotMyselfRequired, 
+										sessionController.adminAndNotMyselfRequired, //comprueba que es admin y que la operacion no cae sobre el
 										userController.destroy);  // borrar cuenta
 
 // Definición de rutas de /quizzes
 router.get('/quizzes.:format?',                     	quizController.index); //modificdo en p11
 router.get('/quizzes/:quizId(\\d+).:format?',       	quizController.show);  //modificdo en p11
 router.get('/quizzes/:quizId(\\d+)/check', 	quizController.check);
-router.get('/quizzes/new',                 	sessionController.loginRequired, 
+router.get('/quizzes/new',                 	sessionController.loginRequired, //para craer preguntas
 											quizController.new);
-router.post('/quizzes',                    	sessionController.loginRequired, 
+router.post('/quizzes',                    	sessionController.loginRequired, //comprueba que esta log in
 											quizController.create);
 router.get('/quizzes/:quizId(\\d+)/edit',  	sessionController.loginRequired, 
-										   	quizController.ownershipRequired, 
+										   	quizController.ownershipRequired, //comprueba si el usuario autenticado es el propietario de quiz o es el admin
 										   	quizController.edit);
 router.put('/quizzes/:quizId(\\d+)',       	sessionController.loginRequired, 
 											quizController.ownershipRequired, 
@@ -67,7 +70,7 @@ router.get('/quizzes/:quizId(\\d+)/comments/new',  sessionController.loginRequir
 	                                               commentController.new);
 router.post('/quizzes/:quizId(\\d+)/comments',     sessionController.loginRequired, 
 	                                               commentController.create);
-router.put('/quizzes/:quizId(\\d+)/comments/:commentId(\\d+)/accept', 
+router.put('/quizzes/:quizId(\\d+)/comments/:commentId(\\d+)/accept', 		//para aceptar comentarios
 	                                               sessionController.loginRequired, 
 	                                               quizController.ownershipRequired, 
 	                                               commentController.accept);
